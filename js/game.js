@@ -381,12 +381,25 @@
 
   // ------------------------------------------------------------ the levels
   // Places are functions of the stage width (E.W): the game fills any screen.
-  const row = (n, gap, y) => [...Array(n)].map((_, i) => ({ x: E.W / 2 + (i - (n - 1) / 2) * gap, y }));
+  // The rows at the top fit between the level path (left, unless it is below
+  // the stage on a tall screen) and the buttons in the top right corner.
+  function topArea() {
+    const l = E.portrait ? 30 : 95;
+    const r = Math.min(E.W - 30, E.hudLeft - 15);
+    return { cx: (l + r) / 2, half: (r - l) / 2 };
+  }
+  const row = (n, gap, y) => {
+    const a = topArea();
+    gap = Math.min(gap, (a.half * 2 - 20) / n);
+    return [...Array(n)].map((_, i) => ({ x: a.cx + (i - (n - 1) / 2) * gap, y }));
+  };
+  const starHalf = () => Math.min(380, topArea().half - 45);
+  const bulbHalf = () => Math.min(360, topArea().half - 70);
   const TREE = { y: 240, h: 215 };
   const LEVELS = [
     {
       kind: 'star', count: 8, speed: 165,
-      slots: () => [...Array(8)].map((_, i) => { const t = i / 7; return { x: E.W / 2 - 380 + t * 760, y: 125 - Math.sin(t * Math.PI) * 55 }; }),
+      slots: () => { const cx = topArea().cx, h = starHalf(); return [...Array(8)].map((_, i) => { const t = i / 7; return { x: cx - h + t * h * 2, y: 125 - Math.sin(t * Math.PI) * 55 }; }); },
       item: (c, it, s) => drawStar(c, it.x, it.y, s * 0.9)
     },
     {
@@ -401,13 +414,13 @@
     },
     {
       kind: 'ball', count: 8, speed: 195, colors: BALL_COLORS,
-      slots: () => [[-60, -36], [0, -26], [60, -36], [-44, -78], [44, -78], [-28, -120], [28, -120], [0, -160]]
-        .map(([dx, dy]) => ({ x: E.W / 2 + dx, y: TREE.y + dy })),
+      slots: () => { const cx = topArea().cx; return [[-60, -36], [0, -26], [60, -36], [-44, -78], [44, -78], [-28, -120], [28, -120], [0, -160]]
+        .map(([dx, dy]) => ({ x: cx + dx, y: TREE.y + dy })); },
       item: (c, it, s) => drawBall(c, it.x, it.y, s * 1.2, it.color)
     },
     {
       kind: 'bulb', count: 10, speed: 205, colors: BULB_COLORS,
-      slots: () => [...Array(10)].map((_, i) => { const t = i / 9; return { x: E.W / 2 - 360 + t * 720, y: 72 + 4 * t * (1 - t) * 50 }; }),
+      slots: () => { const cx = topArea().cx, h = bulbHalf(); return [...Array(10)].map((_, i) => { const t = i / 9; return { x: cx - h + t * h * 2, y: 72 + 4 * t * (1 - t) * 50 }; }); },
       item: (c, it, s) => drawBulb(c, it.x, it.y, s * 1.3, it.color, true)
     },
     {
@@ -416,19 +429,26 @@
     }
   ];
 
-  /** The level path on the left: done, now, still to come (top to bottom). */
+  /** The level path: done, now, still to come. On the left, top to bottom;
+   *  on a tall screen bigger and in a row in the snow below the stage. */
   function drawLevelPath(c, current) {
+    const below = E.portrait;
+    const k = below ? E.clamp((E.viewBottom - 900) / 140, 1, 1.9) : 1;
     LEVELS.forEach((L, i) => {
-      const x = 44, y = 46 + i * 60;
+      const x = below ? E.W / 2 + (i - (LEVELS.length - 1) / 2) * 68 * k : 44;
+      const y = below ? (900 + E.viewBottom) / 2 : 46 + i * 60;
       const now = i === current, done = i < current;
+      c.save();
+      c.translate(x, y);
+      c.scale(k, k);
       c.globalAlpha = done || now ? 1 : 0.4;
-      c.fillStyle = now ? 'rgba(255,213,79,0.4)' : 'rgba(11,26,58,0.6)';
-      c.beginPath(); c.arc(x, y, now ? 29 : 24, 0, TAU); c.fill();
+      c.fillStyle = now ? 'rgba(255,213,79,0.55)' : 'rgba(11,26,58,0.6)';
+      c.beginPath(); c.arc(0, 0, now ? 29 : 24, 0, TAU); c.fill();
       if (done) { c.strokeStyle = '#ffd54f'; c.lineWidth = 3; c.stroke(); }
-      if (L.kind === 'house') drawHouseIcon(c, x, y + 2, 32, done);
-      else if (L.kind === 'gift') drawGift(c, x, y + 3, 28, Art.COLORS.red);
-      else L.item(c, { x, y, color: L.colors ? L.colors[0] : null }, now ? 21 : 18, true);
-      c.globalAlpha = 1;
+      if (L.kind === 'house') drawHouseIcon(c, 0, 2, 32, done);
+      else if (L.kind === 'gift') drawGift(c, 0, 3, 28, Art.COLORS.red);
+      else L.item(c, { x: 0, y: 0, color: L.colors ? L.colors[0] : null }, now ? 21 : 18, true);
+      c.restore();
     });
   }
 
@@ -447,16 +467,18 @@
         }
       });
     } else if (L.kind === 'ball') {
-      Art.bigTree(c, E.W / 2, TREE.y, TREE.h);
+      const cx = topArea().cx;
+      Art.bigTree(c, cx, TREE.y, TREE.h);
       c.fillStyle = '#ffd54f';
-      Art.star(c, E.W / 2, TREE.y - TREE.h * 1.02, 18, 8);
+      Art.star(c, cx, TREE.y - TREE.h * 1.02, 18, 8);
       slots.forEach((p, i) => {
         if (i < filled) drawBall(c, p.x, p.y, 30, L.colors[i % L.colors.length]);
         else { c.fillStyle = 'rgba(255,255,255,0.25)'; c.beginPath(); c.arc(p.x, p.y, 12, 0, TAU); c.fill(); }
       });
     } else if (L.kind === 'bulb') {
       c.strokeStyle = '#2e7d32'; c.lineWidth = 5;
-      c.beginPath(); c.moveTo(E.W / 2 - 420, 50); c.quadraticCurveTo(E.W / 2, 170, E.W / 2 + 420, 50); c.stroke();
+      const cx = topArea().cx, h = bulbHalf() + 60;
+      c.beginPath(); c.moveTo(cx - h, 50); c.quadraticCurveTo(cx, 170, cx + h, 50); c.stroke();
       slots.forEach((p, i) => {
         const lit = i < filled;
         c.globalAlpha = lit ? 1 : 0.35;
@@ -521,6 +543,7 @@
     let prize = null;                // the new piece for the sleigh, at the end
 
     const right = () => E.W + 100;
+    const textX = () => E.clamp(E.W / 2 + 150, 380, E.W - 380);   // "Crăciun fericit!" fits
     const maxX = () => E.W - 460;
 
     // ---- level flow
@@ -786,7 +809,7 @@
         if (a > 0) {
           c.save();
           c.globalAlpha = a;
-          c.translate(E.W / 2 + 150, 430);
+          c.translate(textX(), 430);
           c.scale(s, s);
           c.font = `800 96px ${E.font}`;
           c.textAlign = 'center'; c.textBaseline = 'middle';
@@ -801,7 +824,7 @@
           const pt = prize.t;
           const grow = E.easeOutBack(Math.min(1, pt / 0.5));
           const fly = E.easeInOut(E.clamp((pt - 1.6) / 0.7, 0, 1));
-          const cx = E.lerp(E.W / 2 + 150, team.x, fly), cy = E.lerp(470, team.y - 20, fly);
+          const cx = E.lerp(textX(), team.x, fly), cy = E.lerp(470, team.y - 20, fly);
           const sc = grow * (1 - fly * 0.7);
           c.save();
           c.translate(cx, cy);

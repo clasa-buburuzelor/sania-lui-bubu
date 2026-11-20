@@ -2,9 +2,15 @@
  * engine.js — canvas, game loop, input and shared effects.
  *
  * The stage is always 900 units high; its width (E.W) follows the shape of
- * the browser window (between 1200 and 2400 units), so the game fills the
+ * the browser window (between 900 and 2400 units), so the game fills the
  * whole window without black bars. Scenes draw in these units, read E.W for
  * the right edge and receive pointer events already converted to them.
+ *
+ * On tall screens (phones and tablets held upright) the stage is 900 wide
+ * and the window is taller than it: E.viewTop (< 0) and E.viewBottom (> 900)
+ * tell scenes how far the visible area goes above and below the stage, so
+ * the sky can go on upwards and the snow downwards. E.portrait is true when
+ * there is room below the stage for things like the level path.
  *
  * Scene interface (all optional):
  *   enter(), leave(), update(dt), draw(ctx), down(x, y), move(x, y, pressed),
@@ -29,6 +35,7 @@
     time: 0,            // seconds since start
     lastInput: 0,       // time of the last click (for the idle hand)
     scale: 1, ox: 0, oy: 0, dpr: 1,
+    viewTop: 0, viewBottom: H, portrait: false, hudLeft: W,
     pointer: { x: W / 2, y: H / 2, pressed: false },
     font: '"Baloo 2", "Comic Sans MS", system-ui, sans-serif'
   };
@@ -57,13 +64,27 @@
     E.dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(cw * E.dpr);
     canvas.height = Math.round(ch * E.dpr);
-    W = E.W = E.clamp(H * cw / Math.max(1, ch), 1200, 2400);
+    W = E.W = E.clamp(H * cw / Math.max(1, ch), 900, 2400);
     E.scale = Math.min(cw / W, ch / H);
     E.ox = (cw - W * E.scale) / 2;
-    E.oy = (ch - H * E.scale) / 2;
+    // tall screen: the stage sits a little above the middle (more sky on top)
+    const free = ch - H * E.scale;
+    E.oy = free > 0 ? free * 0.55 : free / 2;
+    E.viewTop = -E.oy / E.scale;
+    E.viewBottom = (ch - E.oy) / E.scale;
+    E.portrait = E.viewBottom - H > 130;
+    // where the buttons in the top right corner start (stage units), when
+    // they cover the top of the stage; the rows of the game stay left of them
+    const hud = document.querySelector('.hud');
+    const r = hud && hud.getBoundingClientRect();
+    E.hudLeft = r && r.width && r.bottom > E.oy + 4 ? (r.left - E.ox) / E.scale : W;
     bgCache.clear();
   }
+  E.resize = resize;
   window.addEventListener('resize', resize);
+  // phones and tablets: some browsers report the new size a bit after turning
+  window.addEventListener('orientationchange', () => setTimeout(resize, 300));
+  if (window.visualViewport) visualViewport.addEventListener('resize', resize);
   resize();
 
   /** Draws a static background once into an offscreen canvas, then reuses it. */
@@ -83,8 +104,11 @@
   };
 
   // ------------------------------------------------------------ input
+  // With a finger the sleigh goes a little above the touch point, so the
+  // finger does not cover Bubu (about 45 screen pixels, more on big screens).
   function toStage(e) {
-    return { x: (e.clientX - E.ox) / E.scale, y: (e.clientY - E.oy) / E.scale };
+    const lift = e.pointerType === 'touch' ? Math.min(70, 45 / E.scale) : 0;
+    return { x: (e.clientX - E.ox) / E.scale, y: (e.clientY - E.oy) / E.scale - lift };
   }
   canvas.addEventListener('pointerdown', e => {
     SFX.unlock();
@@ -126,7 +150,7 @@
     for (const f of flakes) {
       f.y += f.v * dt;
       f.x += (Math.sin(E.time * 0.8 + f.ph) * 18 + E.snow.wind) * dt;
-      if (f.y > H + 8) { f.y = -8; f.x = E.rand(0, W); }
+      if (f.y > E.viewBottom + 8) { f.y = E.viewTop - 8; f.x = E.rand(0, W); }
       if (f.x > W + 8) f.x = -8; else if (f.x < -8) f.x = W + 8;
       ctx.moveTo(f.x + f.r, f.y);
       ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
@@ -271,7 +295,7 @@
     ctx.setTransform(k, 0, 0, k, E.ox * E.dpr, E.oy * E.dpr);
     ctx.save();
     ctx.beginPath();
-    ctx.rect(0, 0, W, H);
+    ctx.rect(0, E.viewTop, W, E.viewBottom - E.viewTop);
     ctx.clip();
 
     const s = E.scene;

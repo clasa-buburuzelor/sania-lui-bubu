@@ -23,7 +23,7 @@
     },
     {
       art: '<span class="a float" style="top:12%;left:14%">⭐</span><span class="a float" style="top:30%;right:14%;animation-delay:-1s">⭐</span><span class="a float" style="top:52%;left:36%;animation-delay:-2s">⭐</span><span class="a" style="bottom:6%;right:8%">🖱️</span>',
-      text: 'Copii, ajutați-o pe Bubu! <b>Mișcați mouse-ul</b>, iar sania zboară după el. Puneți stelele la loc pe cer, adunați cadourile, clopoțeii, globurile și beculețele, apoi duceți darurile la case. La sfârșit va apărea <b>Steaua cea mare de Crăciun</b>!'
+      text: 'Copii, ajutați-o pe Bubu! <b>Mișcați mouse-ul</b> (sau degetul pe ecran), iar sania zboară după el. Puneți stelele la loc pe cer, adunați cadourile, clopoțeii, globurile și beculețele, apoi duceți darurile la case. La sfârșit va apărea <b>Steaua cea mare de Crăciun</b>!'
     }
   ];
 
@@ -56,6 +56,9 @@
   btnSound.addEventListener('click', () => { SFX.setMuted(!SFX.isMuted()); paintSound(); });
   paintSound();
 
+  // iPhone has no fullscreen for web pages: hide the button there
+  const root = document.documentElement;
+  if (!root.requestFullscreen && !root.webkitRequestFullscreen) { $('btnFullscreen').hidden = true; E.resize(); }
   $('btnFullscreen').addEventListener('click', () => {
     const d = document;
     if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);

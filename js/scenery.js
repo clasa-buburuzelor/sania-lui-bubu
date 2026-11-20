@@ -634,6 +634,7 @@
     const offs = LAYERS.map(() => 0);
     const rnd = seeded(21);
     const twinkles = [...Array(16)].map(() => ({ x: rnd(), y: 30 + rnd() * 420, s: 5 + rnd() * 7, ph: rnd() * TAU }));
+    const upStars = [...Array(40)].map(() => ({ x: rnd(), y: rnd(), r: 0.6 + rnd() * 1.6 }));
     const flakes = th.snowing ? [...Array(E.reduced ? 20 : 60)].map(() => ({ x: rnd(), y: rnd() * 900, r: 2 + rnd() * 3, v: 60 + rnd() * 60, ph: rnd() * TAU })) : [];
     let cur = place || 'munti', prev = null, fade = 1;
 
@@ -668,11 +669,24 @@
         if (fade < 1) fade = Math.min(1, fade + dt / 1.6);
         for (const f of flakes) {
           f.y += f.v * dt;
-          if (f.y > 910) { f.y = -10; f.x = Math.random(); }
+          if (f.y > Math.max(910, E.viewBottom + 10)) { f.y = Math.min(-10, E.viewTop - 10); f.x = Math.random(); }
         }
       },
       /** sky, twinkling stars, mountains and hills */
       drawBack(c) {
+        // tall screen: the sky goes on above the stage
+        if (E.viewTop < 0) {
+          c.fillStyle = th.sky[0];
+          c.fillRect(0, E.viewTop - 2, E.W, 4 - E.viewTop);
+          c.fillStyle = 'rgba(255,255,255,0.8)';
+          c.beginPath();
+          for (const t of upStars) {
+            const y = t.y * E.viewTop;
+            if (y > -6) continue;
+            c.moveTo(t.x * E.W + t.r, y); c.arc(t.x * E.W, y, t.r, 0, TAU);
+          }
+          c.fill();
+        }
         c.drawImage(tile(`${n}|sky`, E.W, 0, 900, o => drawSky(o, th)), 0, 0, E.W, 900);
         c.fillStyle = '#fffbe6';
         for (const t of twinkles) {
@@ -686,6 +700,14 @@
       /** the place right under the sleigh (and the thick snow of the snowy night) */
       drawFront(c) {
         layers(c, 2, 2);
+        // tall screen: the snow goes on below the stage
+        if (E.viewBottom > 900) {
+          const g = c.createLinearGradient(0, 899, 0, E.viewBottom);
+          g.addColorStop(0, th.snow);
+          g.addColorStop(1, th.snowShade);
+          c.fillStyle = g;
+          c.fillRect(0, 898, E.W, E.viewBottom - 898 + 2);
+        }
         if (flakes.length) {
           c.fillStyle = 'rgba(255,255,255,0.75)';
           c.beginPath();

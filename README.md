@@ -27,6 +27,7 @@ Alte lucruri bune de știut:
 - Nu are cronometru și nu se poate greși. Ce scapă se întoarce.
 - Nu are voce care numără și nici mânuță-indiciu.
 - Jocul umple toată fereastra browserului, fără margini, la orice formă de ecran.
+- Merge și pe **telefon și tabletă**, ținute vertical sau orizontal: sania urmează degetul (puțin deasupra lui, ca degetul să n-o acopere pe Bubu). Când ecranul e ținut vertical, cerul continuă în sus, zăpada continuă în jos, iar cerculețele cu misiunile se mută jos, în zăpadă. Butoanele și povestea se micșorează pe ecranele mici. Pe iPhone butonul ⛶ nu apare, pentru că iPhone nu permite ecran complet paginilor web.
 - O tură durează cam 5–6 minute.
 
 ## Pentru profesor
@@ -37,7 +38,7 @@ Premiile saniei se păstrează în browserul fiecărui calculator. Ca să le șt
 
 ## Tehnic
 
-HTML + CSS + JavaScript, fără biblioteci și fără fișiere audio. Desenele se fac pe un canvas înalt de 900 de unități, cu lățimea după forma ferestrei (1200–2400), ca să nu rămână margini.
+HTML + CSS + JavaScript, fără biblioteci și fără fișiere audio. Desenele se fac pe un canvas înalt de 900 de unități, cu lățimea după forma ferestrei (900–2400), ca să nu rămână margini. Pe ecranele ținute vertical, zona vizibilă e mai înaltă decât scena (`E.viewTop` / `E.viewBottom`), iar peisajul se prelungește în sus și în jos.
 
 ```
 js/audio.js    clopoțeii de la finalul misiunii, generați în browser (Web Audio)
@@ -48,4 +49,4 @@ js/game.js     jocul
 js/main.js     ecranul de start, povestea, butoanele
 ```
 
-`art.js` e copiat identic din „Unde e Bubu?” și „Bubu salvează Crăciunul”, ca fiecare joc să poată fi publicat separat. `engine.js` are în plus lățimea variabilă, iar `audio.js` are un singur sunet: zurgălăii de sanie care se aud când se termină o misiune, după rețeta din modul de iarnă al site-ului Bubu 2026.
+`art.js` e copiat identic din „Unde e Bubu?” și „Bubu salvează Crăciunul”, ca fiecare joc să poată fi publicat separat. `engine.js` are în plus lățimea variabilă și zona prelungită pentru ecranele verticale, iar `audio.js` are un singur sunet: zurgălăii de sanie care se aud când se termină o misiune, după rețeta din modul de iarnă al site-ului Bubu 2026.
