@@ -317,8 +317,8 @@
   function makeSurprise(kind, scroll) {
     const W = E.W;
     const s = { kind, t: 0, done: false };
-    if (kind === 'owl') { s.x = -90; s.y = E.rand(300, 400); SFX.hoot(); }
-    else if (kind === 'shooting') { s.x = E.rand(W * 0.45, W * 0.95); s.y = E.rand(40, 120); SFX.sparkle(); }
+    if (kind === 'owl') { s.x = -90; s.y = E.rand(300, 400); }
+    else if (kind === 'shooting') { s.x = E.rand(W * 0.45, W * 0.95); s.y = E.rand(40, 120); }
     else if (kind === 'snowman') { s.x = W + 80; }
     else { s.x = W + 60; }
     s.update = function (dt) {
@@ -533,19 +533,17 @@
         L = null;
         state = 'big'; stateT = 0;
         big = { x: right() + 50, y: 470 };
-        SFX.sparkle();
         return;
       }
       L = LEVELS[lv];
       state = 'intro'; stateT = 0;
       spawnT = 0.4;
-      SFX.whoosh();
       if (L.kind === 'house') { addHouse(right()); addHouse(right() + 750); }
     }
 
     function levelDone() {
       state = 'done'; stateT = 0;
-      SFX.fanfare();
+      SFX.bells();                   // the only sound effect: bells when a mission is finished
       team.bubu.wave = true;
       for (const it of items) E.burst(it.x, it.y, Art.SPARKS, 8);
       items = [];
@@ -569,8 +567,7 @@
 
     function catchItem(it) {
       E.burst(it.x, it.y, ['#ffd54f', '#fff59d', '#ffffff'], 14);
-      if (caught >= L.count) { SFX.chime(); return; }   // extras: just sparkle
-      if (L.kind === 'bell') SFX.note(caught); else SFX.chime();
+      if (caught >= L.count) return;   // extras: just sparkle (no sound when collecting)
       const idx = caught++;
       const color = L.colors ? L.colors[idx % L.colors.length] : null;
       flying.push({
@@ -582,7 +579,6 @@
 
     function landed(idx) {
       placed++;
-      SFX.step(placed);
       E.pop(placed, E.W / 2, 380, { size: 190 });
       const to = L.slots()[idx];
       E.burst(to.x, to.y, ['#ffd54f', '#ffffff'], 10, 200);
@@ -597,13 +593,11 @@
       if (caught >= L.count) return;
       h.sent = true;
       const idx = caught++;
-      SFX.whoosh();
       flying.push({
         x0: team.x, y0: team.y - 20, house: h, t: 0, dur: 0.6,
         draw: (c, x, y, k) => Art.gift(c, x, y, E.lerp(50, 34, k), Art.COLORS.red),
         land: () => {
           h.lit = true;
-          SFX.chime();
           E.burst(h.cx, h.cy, Art.SPARKS, 16, 260);
           landed(idx);
         }
@@ -612,12 +606,11 @@
 
     function startEnd() {
       state = 'end'; stateT = 0;
-      SFX.fanfare();
+      SFX.bells();
       E.burst(big.x, big.y, Art.SPARKS, 50, 560);
       big.fx = big.x; big.fy = big.y;
       team.flyTo(330, 640);
       team.bubu.wave = true;
-      setTimeout(() => SFX.carol(), 700);
     }
 
     nextLevel();
@@ -703,17 +696,16 @@
           big.y = E.lerp(big.fy, 190, k);
           if (Math.random() < dt * 5) E.burst(E.rand(150, E.W - 150), E.rand(120, 520), Art.SPARKS, 10, 260);
           // Santa found the way: his sleigh passes over the village
-          if (!santa && stateT > 2) { santa = { x: -350 }; SFX.sleighBells(); }
+          if (!santa && stateT > 2) santa = { x: -350 };
           if (santa) santa.x += 260 * dt;
           // a new piece for the sleigh: shown big, then it flies onto the sleigh
-          if (!prize && stateT > 4) { prize = { n: Rewards.n, t: 0, given: false }; SFX.reward(); }
+          if (!prize && stateT > 4) prize = { n: Rewards.n, t: 0, given: false };
           if (prize) {
             prize.t += dt;
             if (!prize.given && prize.t > 2.3) {
               prize.given = true;
               Rewards.add();
               team.prizes = Rewards.n;
-              SFX.sleighBells();
               E.burst(team.x, team.y - 30, Art.SPARKS, 40, 420);
             }
             if (prize.t > 2.8 && onEnd) { Game.round++; const f = onEnd; onEnd = null; f(); }
