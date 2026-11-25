@@ -111,16 +111,35 @@ button:focus-visible { outline: 4px solid var(--gold); outline-offset: 3px; }
   animation: pulse 1.6s ease-in-out infinite;
 }
 .play-btn:active { transform: translateY(6px); box-shadow: 0 4px 0 #155a30; animation: none; }
+/* end-of-game "continue" button: a green pill, sled + arrow pointing onward */
 .play-btn--again {
   position: fixed;
   right: max(24px, 3vw, env(safe-area-inset-right));
   bottom: max(24px, 4vh, env(safe-area-inset-bottom));
   margin: 0;
   z-index: 15;
-  padding-left: 0;
-  width: clamp(110px, 16vmin, 160px);
-  height: clamp(110px, 16vmin, 160px);
+  display: flex;
+  align-items: center;
+  gap: .12em;
+  width: auto;
+  height: clamp(100px, 15vmin, 150px);
+  padding: 0 .45em 0 .35em;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #6fe39a, var(--green) 55%, #1d6e3b);
   font-size: clamp(54px, 8vmin, 80px);
+  transform-origin: right bottom;
+}
+.play-btn--again[hidden] { display: none; }
+.again-sled { display: block; animation: sled-hop 1s ease-in-out infinite; }
+.again-arrow { display: block; width: .95em; height: .95em; color: #fff; animation: arrow-nudge 1s ease-in-out infinite; }
+
+@keyframes sled-hop {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-.08em) rotate(-6deg); }
+}
+@keyframes arrow-nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(.14em); }
 }
 
 @keyframes pulse {
@@ -254,7 +273,7 @@ button:focus-visible { outline: 4px solid var(--gold); outline-offset: 3px; }
   .start { padding-top: max(10px, 3vh); }
   .start-title { font-size: clamp(28px, 11vh, 84px); }
   .play-btn { margin-top: 2vh; width: clamp(96px, 32vh, 220px); height: clamp(96px, 32vh, 220px); font-size: clamp(46px, 16vh, 110px); border-width: 6px; }
-  .play-btn--again { width: clamp(84px, 26vh, 160px); height: clamp(84px, 26vh, 160px); font-size: clamp(40px, 13vh, 80px); }
+  .play-btn--again { width: auto; height: clamp(76px, 24vh, 150px); font-size: clamp(40px, 13vh, 80px); }
 
   .book { padding: 8px max(8px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left)); gap: 8px; }
   .book-page {
@@ -280,5 +299,5 @@ button:focus-visible { outline: 4px solid var(--gold); outline-offset: 3px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .play-btn, .book-art * { animation: none !important; }
+  .play-btn, .play-btn *, .book-art * { animation: none !important; }
 }

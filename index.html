@@ -48,8 +48,11 @@
     <button class="book-close" id="bookClose" type="button" aria-label="Închide povestea">✕</button>
   </section>
 
-  <!-- ===== Replay button shown at the end ===== -->
-  <button class="play-btn play-btn--again" id="btnAgain" type="button" aria-label="Joacă din nou" hidden>🔁</button>
+  <!-- ===== "Continue" button shown at the end: next round brings new missions ===== -->
+  <button class="play-btn play-btn--again" id="btnAgain" type="button" aria-label="Mergem mai departe! Misiuni noi" hidden>
+    <span class="again-sled" aria-hidden="true">🛷</span>
+    <svg class="again-arrow" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 24h26M24 12l12 12-12 12" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
 
   <noscript><p class="noscript">Pentru acest joc trebuie activat JavaScript în browser.</p></noscript>
 
