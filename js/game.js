@@ -526,15 +526,18 @@
   };
 
   // ------------------------------------------------------------ the game
-  Game.play = function (onEnd) {
+  Game.missions = LEVELS.length;
+  // first = 0-based mission to start from (from the URL); LEVELS.length = the big star
+  Game.play = function (onEnd, first) {
     Rewards.load();
+    first = E.clamp(first | 0, 0, LEVELS.length);
     const night = Game.round;
     const fast = SPEED_UP[Math.min(night, SPEED_UP.length - 1)];
     const team = makeTeam(350, 480);
     const places = Scenery.placesFor(night);       // another landscape for every level
-    const land = Scenery.make(night, places[0]);
+    const land = Scenery.make(night, places[Math.min(first, places.length - 1)]);
     const clouds = makeClouds();
-    let lv = -1, L = null;
+    let lv = first - 1, L = null;
     let items = [], flying = [], houses = [], surprises = [];
     let caught = 0, placed = 0, spawnT = 0, surpriseT = E.rand(10, 16), lastSurprise = '';
     let state = 'intro', stateT = 0, t = 0;

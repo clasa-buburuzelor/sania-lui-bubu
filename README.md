@@ -34,6 +34,8 @@ Alte lucruri bune de știut:
 
 Butonul **📖** din colțul din stânga jos deschide **povestea** (4 pagini cu text mare), pe care o poți citi la tablă. Paginile se schimbă cu săgețile de pe ecran sau de la tastatură. Butonul verde de pe ultima pagină pornește jocul.
 
+Poți sări direct la o misiune din adresa paginii: adaugă `#misiune=3` (de la 1 la 6; `7` sau `final` înseamnă Steaua cea mare). Cu `&tura=2` alegi și tura, adică alt cer și alte peisaje. Exemplu: `index.html#misiune=5&tura=2`. Dacă schimbi adresa cât timp jocul e deschis, sari imediat acolo, fără reîncărcare. Merge și cu `?misiune=3`.
+
 Premiile saniei se păstrează în browserul fiecărui calculator. Ca să le ștergi (de exemplu, pentru altă clasă), apasă **Shift + R** pe ecranul de start.
 
 ## Tehnic

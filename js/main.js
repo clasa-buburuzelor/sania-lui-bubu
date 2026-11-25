@@ -34,17 +34,44 @@
     E.go(Game.start());
   }
 
-  function play() {
+  function play(first) {
     SFX.unlock();
     $('start').hidden = true;
     $('btnAgain').hidden = true;
     E.go(Game.play(() => {
       $('btnAgain').hidden = false;
-    }));
+    }, typeof first === 'number' ? first : 0));
   }
 
-  $('btnPlay').addEventListener('click', play);
-  $('btnAgain').addEventListener('click', play);
+  // ------------------------------------------------------------ jump to a mission from the URL
+  // #misiune=3 (1–6, 7 or "final" = the big star), optionally &tura=2 (another
+  // night and other places). ?misiune=3 works too. Changing the hash while the
+  // page is open jumps straight there, without reloading.
+  function fromUrl() {
+    const q = new URLSearchParams(location.search);
+    const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const get = k => h.get(k) ?? q.get(k);
+    const m = get('misiune');
+    if (m === null) return null;
+    const n = m === 'final' ? Game.missions + 1 : parseInt(m, 10);
+    if (!(n >= 1)) return null;
+    const t = parseInt(get('tura'), 10);
+    if (t >= 1) Game.round = t - 1;
+    return Math.min(n, Game.missions + 1) - 1;
+  }
+  function goFromUrl() {
+    const first = fromUrl();
+    if (first === null) return false;
+    if (!book.hidden) closeBook();
+    play(first);
+    return true;
+  }
+  window.addEventListener('hashchange', goFromUrl);
+  // without a click there is no sound yet: unlock it at the first touch
+  document.addEventListener('pointerdown', () => SFX.unlock(), { once: true });
+
+  $('btnPlay').addEventListener('click', () => play());
+  $('btnAgain').addEventListener('click', () => play());
 
   const btnSound = $('btnSound');
   function paintSound() {
@@ -109,6 +136,6 @@
     else if (e.key === 'Escape') closeBook();
   });
 
-  showStart();
+  if (!goFromUrl()) showStart();
   E.start();
 })();
