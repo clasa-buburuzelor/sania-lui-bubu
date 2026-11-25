@@ -21,7 +21,7 @@ Fiecare misiune are alt **peisaj** dedesubt. În total sunt 12:
 **Ca să vrea să joace din nou:**
 - **Premiu pentru sanie.** La finalul fiecărei ture, sania primește ceva nou: beculețe, clopoței la reni, sacul cu daruri, crenguță de vâsc, felinar-stea și o dâră de steluțe. După toate cele 6, sania își schimbă culoarea la fiecare tură. Sania se vede, cu tot ce a primit, și pe ecranul de start.
 - **Surprize.** Din când în când trece o bufniță, o stea căzătoare, un om de zăpadă care face cu mâna sau un iepuraș. Nu trebuie făcut nimic cu ele.
-- **Altă noapte.** Cu 🔁, fiecare tură nouă are alt cer și e puțin mai rapidă. Sunt 6 ceruri: noapte albastră, aurora boreală, seară violet-roz, noapte cu ninsoare deasă, Calea Lactee și zori de zi.
+- **Altă noapte.** Cu butonul verde de la final (sania cu săgeata), fiecare tură nouă are alt cer și e puțin mai rapidă. Sunt 6 ceruri: noapte albastră, aurora boreală, seară violet-roz, noapte cu ninsoare deasă, Calea Lactee și zori de zi.
 
 Alte lucruri bune de știut:
 - Nu are cronometru și nu se poate greși. Ce scapă se întoarce.
